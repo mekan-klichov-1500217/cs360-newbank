@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from accounts.models import Account
+from django.core.exceptions import ValidationError
 
 class LoginViewTests(TestCase):
     def setUp(self):
