@@ -24,3 +24,12 @@ class LoginViewTests(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Invalid username or password')
+    
+    def test_login_with_uppercase_username(self):
+        # Even if the user created is 'testuser', try logging in with 'TestUser'
+        # This will fail if the system enforces strict case-sensitivity or if the view logic doesn't normalize the input.
+        response = self.client.post(reverse('accounts:login'), {
+            'username': 'TESTUSER', 
+            'password': 'password123'
+        })
+        self.assertRedirects(response, reverse('accounts:my_account'))
