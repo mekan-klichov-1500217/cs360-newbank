@@ -11,9 +11,21 @@ class Account(AbstractUser):
         # Access the raw password from the instance if it was set
         password = getattr(self, '_password', None)
         if password:
+            # 1. Length check
             if len(password) < 8:
                 raise ValidationError({'password': 'Password must be at least 8 characters.'})
-            # ... rest of your checks ...
+            
+            # 2. Digit check
+            if not any(char.isdigit() for char in password):
+                raise ValidationError({'password': 'Password must contain at least one digit.'})
+                
+            # 3. Special character check
+            if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+                raise ValidationError({'password': 'Password must contain at least one special character.'})
+            
+            # 4. Common sequence check
+            if '12345678' in password:
+                raise ValidationError({'password': 'Password is too common/weak.'})
 
     def set_password(self, raw_password):
         self._password = raw_password # Temporarily store raw for validation
