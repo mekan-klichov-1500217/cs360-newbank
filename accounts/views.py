@@ -12,10 +12,13 @@ def my_account(request):
 def login(request):
     if request.user.is_authenticated:
         return redirect('accounts:my_account')
+    
     error_message = None
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        # Normalize to lowercase to handle uppercase login attempts
+        username = request.POST.get('username', '').lower()
+        password = request.POST.get('password', '')
+        
         user = authenticate(request, username=username, password=password)
         if user:
             auth_login(request, user)

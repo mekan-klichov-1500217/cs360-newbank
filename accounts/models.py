@@ -1,6 +1,23 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.exceptions import ValidationError
+import re
 
-# Create your models here.
 class Account(AbstractUser):
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+
+    def clean(self):
+        super().clean()
+        if self.password:
+            if len(self.password) < 8:
+                raise ValidationError({'password': 'Password must be at least 8 characters.'})
+            if not any(char.isdigit() for char in self.password):
+                raise ValidationError({'password': 'Password must contain at least one digit.'})
+            if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", self.password):
+                raise ValidationError({'password': 'Password must contain at least one special character.'})
+            if '12345678' in self.password:
+                raise ValidationError({'password': 'Password is too common/weak.'})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Ensures clean() is called before every save
+        super().save(*args, **kwargs)
