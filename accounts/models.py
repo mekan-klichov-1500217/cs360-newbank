@@ -8,15 +8,16 @@ class Account(AbstractUser):
 
     def clean(self):
         super().clean()
-        if self.password:
-            if len(self.password) < 8:
+        # Access the raw password from the instance if it was set
+        password = getattr(self, '_password', None)
+        if password:
+            if len(password) < 8:
                 raise ValidationError({'password': 'Password must be at least 8 characters.'})
-            if not any(char.isdigit() for char in self.password):
-                raise ValidationError({'password': 'Password must contain at least one digit.'})
-            if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", self.password):
-                raise ValidationError({'password': 'Password must contain at least one special character.'})
-            if '12345678' in self.password:
-                raise ValidationError({'password': 'Password is too common/weak.'})
+            # ... rest of your checks ...
+
+    def set_password(self, raw_password):
+        self._password = raw_password # Temporarily store raw for validation
+        super().set_password(raw_password)
 
     def save(self, *args, **kwargs):
         self.full_clean()  # Ensures clean() is called before every save

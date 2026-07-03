@@ -36,12 +36,10 @@ class LoginViewTests(TestCase):
         self.assertRedirects(response, reverse('accounts:my_account'))
     
     def test_password_too_short(self):
-        """Test that passwords shorter than 8 characters are rejected."""
-        # This will fail if your model currently accepts short passwords
-        user = Account.objects.create_user(username='shortuser', password='123')
-        # We assume you have a validation method like full_clean()
+        user = Account(username='shortuser')
+        user.set_password('123') # Sets the raw password
         with self.assertRaises(ValidationError):
-            user.full_clean()
+            user.full_clean() # Now this will trigger your clean() method
 
     def test_password_no_numbers(self):
         """Test that passwords must contain at least one digit."""
