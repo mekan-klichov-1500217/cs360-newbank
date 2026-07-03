@@ -42,8 +42,8 @@ class LoginViewTests(TestCase):
             user.full_clean() # Now this will trigger your clean() method
 
     def test_password_no_numbers(self):
-        """Test that passwords must contain at least one digit."""
-        user = Account.objects.create_user(username='no_number_user', password='password')
+        user = Account(username='no_number_user')
+        user.set_password('password')  # MUST use set_password()
         with self.assertRaises(ValidationError):
             user.full_clean()
 
