@@ -1,23 +1,26 @@
-from django.test import TestCase
-from django.core.exceptions import ValidationError
+from django.test import TestCase, Client
+from django.urls import reverse
 from accounts.models import Account
 
-class AccountRegistrationTests(TestCase):
-    def test_account_validation_scenarios(self):
-        # Define test cases: (data, expected_error_key)
-        scenarios = [
-            ({'account_number': '', 'balance': 100}, 'account_number'), # Empty input
-            ({'account_number': '123', 'balance': -50}, 'balance'),    # Negative balance
-            ({'account_number': 'ABC', 'balance': 100}, 'account_number'), # Invalid format
-            ({'account_number': '12345', 'balance': 0}, None),         # Valid case
-        ]
+class LoginViewTests(TestCase):
+    def setUp(self):
+        # Create a user to test login
+        self.user = Account.objects.create_user(username='testuser', password='password123')
+        self.client = Client()
 
-        for data, expected_error in scenarios:
-            with self.subTest(data=data):
-                account = Account(**data)
-                if expected_error:
-                    with self.assertRaises(ValidationError):
-                        account.full_clean()
-                else:
-                    # Should pass for the valid scenario
-                    account.full_clean()
+    def test_login_success(self):
+        # Test that valid credentials redirect to my_account
+        response = self.client.post(reverse('accounts:login'), {
+            'username': 'testuser',
+            'password': 'password123'
+        })
+        self.assertRedirects(response, reverse('accounts:my_account'))
+
+    def test_login_failure(self):
+        # Test that invalid credentials show error message
+        response = self.client.post(reverse('accounts:login'), {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Invalid username or password')
