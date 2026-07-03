@@ -49,12 +49,16 @@ class LoginViewTests(TestCase):
 
     def test_password_common_sequence(self):
         """Test that simple sequences like '12345678' are rejected."""
-        user = Account.objects.create_user(username='weakuser', password='12345678')
+        user = Account(username='weakuser')
+        user.set_password('12345678')
+        # Call clean() directly to trigger your custom logic
         with self.assertRaises(ValidationError):
-            user.full_clean()
+            user.clean()
 
     def test_password_no_special_chars(self):
         """Test that passwords must contain at least one special character."""
-        user = Account.objects.create_user(username='nospecialuser', password='password123')
+        user = Account(username='nospecialuser')
+        user.set_password('password123')
+        # Call clean() directly to trigger your custom logic
         with self.assertRaises(ValidationError):
-            user.full_clean()
+            user.clean()
