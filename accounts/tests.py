@@ -33,3 +33,29 @@ class LoginViewTests(TestCase):
             'password': 'password123'
         })
         self.assertRedirects(response, reverse('accounts:my_account'))
+    
+    def test_password_too_short(self):
+        """Test that passwords shorter than 8 characters are rejected."""
+        # This will fail if your model currently accepts short passwords
+        user = Account.objects.create_user(username='shortuser', password='123')
+        # We assume you have a validation method like full_clean()
+        with self.assertRaises(ValidationError):
+            user.full_clean()
+
+    def test_password_no_numbers(self):
+        """Test that passwords must contain at least one digit."""
+        user = Account.objects.create_user(username='no_number_user', password='password')
+        with self.assertRaises(ValidationError):
+            user.full_clean()
+
+    def test_password_common_sequence(self):
+        """Test that simple sequences like '12345678' are rejected."""
+        user = Account.objects.create_user(username='weakuser', password='12345678')
+        with self.assertRaises(ValidationError):
+            user.full_clean()
+
+    def test_password_no_special_chars(self):
+        """Test that passwords must contain at least one special character."""
+        user = Account.objects.create_user(username='nospecialuser', password='password123')
+        with self.assertRaises(ValidationError):
+            user.full_clean()
